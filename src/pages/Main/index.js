@@ -1,6 +1,7 @@
 /* eslint-disable react/state-in-constructor */
 import React, { Component } from 'react';
 import { Keyboard, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '../../services/api';
 
@@ -24,6 +25,22 @@ export default class Main extends Component {
     users: [],
     loading: false,
   };
+
+  async componentDidMount() {
+    const users = await AsyncStorage.getItem('users');
+
+    if (users) {
+      this.setState({ users: JSON.parse(users) });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    const { users } = this.state;
+
+    if (prevState.users !== users) {
+      AsyncStorage.setItem('users', JSON.stringify(users));
+    }
+  }
 
   handleAddUser = async () => {
     const { users, newUser } = this.state;
@@ -67,8 +84,8 @@ export default class Main extends Component {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Icon name="add" size={20} color="#FFF" />
-            )}
+                <Icon name="add" size={20} color="#FFF" />
+              )}
           </SubmitButton>
         </Form>
 
@@ -81,7 +98,7 @@ export default class Main extends Component {
               <Name>{item.name}</Name>
               <Bio>{item.bio}</Bio>
 
-              <ProfileButton onPress={() => {}}>
+              <ProfileButton onPress={() => { }}>
                 <ProfileButtonText>Ver perfil</ProfileButtonText>
               </ProfileButton>
             </User>
